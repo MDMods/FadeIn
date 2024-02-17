@@ -55,15 +55,30 @@ namespace FadeIn
 
         internal static void EnqueueSkeleton(GameObject beoc)
         {
+            // Main enemy
             Skeleton currentEnemySkeleton = beoc.GetComponent<SkeletonAnimation>().skeleton;
             currentEnemySkeleton.a = 0.7f;
             enemiesSkeletons.Enqueue(currentEnemySkeleton);
 
+            // Music notes
             AirMusicNodeController note = beoc.GetComponent<AirMusicNodeController>();
             if (note) note.m_Fx.SetActive(false);
 
+            // Hearts
             AirEnergyBottleController heart = beoc.GetComponent<AirEnergyBottleController>();
             if (heart) heart.m_Fx.SetActive(false);
+
+            // Hearts on notes
+            GameObject hpOnNote = beoc.transform.Find("hp_on_note(Clone)")?.gameObject;
+            if (hpOnNote)
+            {
+                Skeleton hpSkeleton = hpOnNote.GetComponent<SkeletonAnimation>().skeleton;
+                hpSkeleton.a = 0.7f;
+                AirEnergyBottleController heart2 = hpOnNote.GetComponent<AirEnergyBottleController>();
+                if (heart2) heart2.m_Fx.SetActive(false);
+                enemiesSkeletons.Enqueue(hpSkeleton);
+            }
+
         }
 
         internal static void UpdateQueueElements()
