@@ -1,4 +1,5 @@
-﻿using Il2CppAssets.Scripts.PeroTools.Commons;
+﻿using Il2Cpp;
+using Il2CppAssets.Scripts.PeroTools.Commons;
 using Il2CppFormulaBase;
 using Il2CppSpine;
 using Il2CppSpine.Unity;
@@ -57,7 +58,12 @@ namespace FadeIn
             Skeleton currentEnemySkeleton = beoc.GetComponent<SkeletonAnimation>().skeleton;
             currentEnemySkeleton.a = 0.7f;
             enemiesSkeletons.Enqueue(currentEnemySkeleton);
-            // Check airmusicnodecontroller for note particles
+
+            AirMusicNodeController note = beoc.GetComponent<AirMusicNodeController>();
+            if (note) note.m_Fx.SetActive(false);
+
+            AirEnergyBottleController heart = beoc.GetComponent<AirEnergyBottleController>();
+            if (heart) heart.m_Fx.SetActive(false);
         }
 
         internal static void UpdateQueueElements()

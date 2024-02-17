@@ -15,7 +15,7 @@ namespace FadeIn.Patches
         [HarmonyPatch(nameof(PnlPreparation.Awake))]
         public static void Postfix(PnlPreparation __instance)
         {
-            if (FadeToggle != null) return;
+            if (FadeToggle) return;
 
             FadeToggle = UnityEngine.Object.Instantiate(
                 GameObject.Find("Forward").transform.Find("PnlVolume").Find("LogoSetting").Find("Toggles").Find("TglOn").gameObject,
