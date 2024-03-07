@@ -46,11 +46,11 @@ namespace FadeIn.Patches
 
             FadeToggle.transform.position = new Vector3(-7.6f, -4.8f, 100f);
 
-            UnityEngine.Object.Destroy(txt.GetComponent<Localization>());
-            UnityEngine.Object.Destroy(FadeToggle.GetComponent<Nice.Events.OnToggle>());
-            UnityEngine.Object.Destroy(FadeToggle.GetComponent<Nice.Events.OnToggleOn>());
-            UnityEngine.Object.Destroy(FadeToggle.GetComponent<Nice.Events.OnActivate>());
-            UnityEngine.Object.Destroy(FadeToggle.GetComponent<Nice.Variables.VariableBehaviour>());
+            txt.GetComponent<Localization>().Destroy();
+            FadeToggle.GetComponent<Nice.Events.OnToggle>().Destroy();
+            FadeToggle.GetComponent<Nice.Events.OnToggleOn>().Destroy();
+            FadeToggle.GetComponent<Nice.Events.OnActivate>().Destroy();
+            FadeToggle.GetComponent<Nice.Variables.VariableBehaviour>().Destroy();
         }
     }
 }

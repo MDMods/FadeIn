@@ -4,6 +4,6 @@ namespace FadeIn
 {
     internal static class Extensions
     {
-        public static void Destroy(this GameObject gameObject) => UnityEngine.Object.Destroy(gameObject);
+        public static void Destroy(this Component component) => UnityEngine.Object.Destroy(component);
     }
 }
