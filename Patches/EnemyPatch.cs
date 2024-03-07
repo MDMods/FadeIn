@@ -14,7 +14,7 @@ namespace FadeIn.Patches
         [HarmonyPostfix]
         public static void PostfixEnableVisible(BaseEnemyObjectController __instance)
         {
-            if (!ModManager.IsEnabled) return;
+            if (!SettingsManager.IsEnabled) return;
             Skeleton sk = __instance.m_SkeletonAnimation.skeleton;
             Transform parent = __instance.transform.parent;
 

@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using FadeIn.Managers;
+using HarmonyLib;
 using Il2Cpp;
 using Il2CppAssets.Scripts.PeroTools.GeneralLocalization;
 using UnityEngine;
@@ -24,10 +25,10 @@ namespace FadeIn.Patches
 
             Toggle toggleComp = FadeToggle.GetComponent<Toggle>();
             toggleComp.onValueChanged.AddListener((UnityAction<bool>)
-                ((bool val) => { IsEnabled = val; })
+                ((bool val) => { SettingsManager.IsEnabled = val; })
                 );
             toggleComp.group = null;
-            toggleComp.SetIsOnWithoutNotify(IsEnabled);
+            toggleComp.SetIsOnWithoutNotify(SettingsManager.IsEnabled);
 
             Text txt = FadeToggle.transform.Find("Txt").GetComponent<Text>();
             txt.text = "Fade In";

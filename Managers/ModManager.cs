@@ -5,50 +5,50 @@ using Il2CppSpine.Unity;
 using MelonLoader;
 using System.Collections;
 using UnityEngine;
+using static FadeIn.Managers.SettingsManager;
 
 namespace FadeIn.Managers
 {
     internal static class ModManager
     {
-        private static bool _enabled = false;
-        public static bool IsEnabled
+        private static readonly List<object> CoroutinesList = new();
+        public static void ClearCoroutines()
         {
-            get { return _enabled; }
-            set { _enabled = value; }
+            foreach (var coroutine in CoroutinesList) MelonCoroutines.Stop(coroutine);
+            CoroutinesList.Clear();
         }
 
         public static GameObject FadeToggle = null;
         public static StageBattleComponent SBC { get; set; } = null;
 
-        private static readonly float LowerPositionX = -1.8f;
-        private static readonly float LowerPositionR = 8.0f;
-        private static readonly float MinimalInitialX = 5.8f;
-        private static readonly float NoteInitial = 11.8f;
+
         //private static readonly WaitForSeconds WFS = new WaitForSeconds(0.05f);
         private static readonly WaitForSeconds WFS = null;
 
-        private static IEnumerator UpdateAlphaX(Skeleton sk, Bone x, float initialX)
+        private static void UpdateAlphaValue(Skeleton sk, float coordinate, float LowerLimit, float initial, float LowerPosition)
         {
-            float lowerLimit = Mathf.Min(MinimalInitialX, initialX);
-            while (sk.a > 0.01f && x.x > LowerPositionX)
-            {
-                if ((!SBC?.isInGame ?? true) || (SBC?.isPause ?? true)) yield return null;
+            if (coordinate > LowerLimit) return;
+            sk.a = Mathf.Clamp(
+                (coordinate - LowerPosition) / (initial - LowerPosition),
+                0f, sk.a);
+        }
 
-                if (x.x <= MinimalInitialX)
-                    sk.a = Mathf.Clamp((x.x - LowerPositionX) / (lowerLimit - LowerPositionX), 0f, 1f);
+        private static IEnumerator UpdateAlphaX(Skeleton sk, GameObject gameObject, Bone x, float initialX)
+        {
+            float lowerLimit = Mathf.Min(MinimalDistanceX, initialX);
+            while (sk.a > 0.01f && x.x > DissapearPositionX && gameObject)
+            {
+                UpdateAlphaValue(sk, x.x, MinimalDistanceX, lowerLimit, DissapearPositionX);
                 yield return WFS;
             }
             sk.a = 0f;
         }
 
-        private static IEnumerator UpdateAlphaR(Skeleton sk, Bone y, float initialR)
+        private static IEnumerator UpdateAlphaR(Skeleton sk, GameObject gameObject, Bone y, float initialR)
         {
-            while (sk.a > 0.01f && y.rotation > LowerPositionR)
+            while (sk.a > 0.01f && y.rotation > DissapearPositionR && gameObject)
             {
-                if ((!SBC?.isInGame ?? true) || (SBC?.isPause ?? true)) yield return null;
-
-                if (y.rotation <= 85f)
-                    sk.a = Mathf.Clamp((y.rotation - LowerPositionR) / (initialR - LowerPositionR), 0f, 1f);
+                UpdateAlphaValue(sk, y.rotation, MinimalDistanceR, initialR, DissapearPositionR);
                 yield return WFS;
             }
             sk.a = 0f;
@@ -56,29 +56,32 @@ namespace FadeIn.Managers
 
         private static IEnumerator UpdateAlphaNote(Skeleton sk, GameObject gameObject)
         {
-            Transform transform = gameObject.transform;
-            while (sk.a > 0.01f && transform.position.x > LowerPositionX)
-            {
-                if ((!SBC?.isInGame ?? true) || (SBC?.isPause ?? true)) yield return null;
+            //Waiting for the proper position
+            yield return null;
 
-                float x = transform.position.x;
-                if (x <= MinimalInitialX)
-                    sk.a = Mathf.Clamp((x - LowerPositionX) / (MinimalInitialX - LowerPositionX), 0f, 1f);
+
+            while (sk.a > 0.01f && gameObject)
+            {
+                if ((SBC?.isInGame ?? false) && (!SBC?.isPause ?? false))
+                {
+                    float x = gameObject?.transform?.position.x ?? -3f;
+                    UpdateAlphaValue(sk, x, MinimalDistanceX, MinimalDistanceX, DissapearPositionX);
+                }
                 yield return WFS;
             }
             sk.a = 0f;
         }
 
-        private static object AddCallBackEnemy(Bone xPos, Bone yPos, Skeleton sk)
+        private static void AddCallBackEnemy(Skeleton sk, GameObject gameObject, Bone xPos, Bone yPos)
         {
-            return MelonCoroutines.Start(yPos.rotation > 70f
-                    ? UpdateAlphaR(sk, yPos, yPos.rotation)
-                    : UpdateAlphaX(sk, xPos, xPos.x));
+            CoroutinesList.Add(MelonCoroutines.Start(yPos.rotation > 80f
+                    ? UpdateAlphaR(sk, gameObject, yPos, yPos.rotation)
+                    : UpdateAlphaX(sk, gameObject, xPos, xPos.x)));
         }
 
-        private static object AddCallBackNote(GameObject gameObject, Skeleton sk)
+        private static void AddCallBackNote(Skeleton sk, GameObject gameObject)
         {
-            return MelonCoroutines.Start(UpdateAlphaNote(sk, gameObject));
+            CoroutinesList.Add(MelonCoroutines.Start(UpdateAlphaNote(sk, gameObject)));
         }
 
         internal static float ProcessEnemy(BaseEnemyObjectController beoc, Skeleton sk)
@@ -90,25 +93,25 @@ namespace FadeIn.Managers
             // Music note particles
             if (beoc.TryGetComponent(out AirMusicNodeController note))
             {
-                ModManager.AddCallBackNote(note.gameObject, sk);
+                AddCallBackNote(sk, note.gameObject);
                 note.m_Fx.SetActive(false);
             }
             // Heart particles
             else if (beoc.TryGetComponent(out AirEnergyBottleController heart))
             {
-                ModManager.AddCallBackNote(heart.gameObject, sk);
+                AddCallBackNote(sk, heart.gameObject);
                 heart.m_Fx.SetActive(false);
             }
             else
             {
-                ModManager.AddCallBackEnemy(xPos, yPos, sk);
+                AddCallBackEnemy(sk, beoc.gameObject, xPos, yPos);
             }
 
             //Hearts on notes
             GameObject hpOnNote = beoc.m_Blood;
             if (!hpOnNote) return xPos.x;
 
-            ModManager.AddCallBackEnemy(xPos, yPos, hpOnNote.GetComponent<SkeletonAnimation>().skeleton);
+            AddCallBackEnemy(hpOnNote.GetComponent<SkeletonAnimation>().skeleton, beoc.gameObject, xPos, yPos);
             Transform heartFx = hpOnNote.transform.Find("fx");
 
             if (!heartFx) return xPos.x;
