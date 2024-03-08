@@ -7,7 +7,8 @@ Difficulty increase mod for md.
 * Three difficulty presets (Easy/Medium/Hard).
 
 ### Example video
-[![FadeIn Example Video](https://img.youtube.com/vi/VAOXWivuM7Q/default.jpg)](https://youtu.be/VAOXWivuM7Q)
+It may look a little different in your game since I recorded with some [effects disabled](https://github.com/MDMods/SelectiveEffects).
+[![FadeIn Example Video](https://img.youtube.com/vi/VAOXWivuM7Q/maxresdefault.jpg)](https://youtu.be/VAOXWivuM7Q)
 
 ### Limitations
 * Maybe performance issues ¯\\_(ツ)_/¯
