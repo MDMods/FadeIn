@@ -15,15 +15,15 @@ namespace FadeIn.Patches
             if (!SettingsManager.IsEnabled) return;
 
             Skeleton sk = __instance.m_SkeletonAnimation.skeleton;
-            Transform parent = __instance.transform.parent;
-
             ModManager.ProcessEnemy(__instance, sk);
 
+            Transform parent = __instance.transform.parent;
             if (parent.name.Equals("SceneObjectController")) return;
             for (int i = 0; i < parent.childCount; i++)
             {
-                if (parent.GetChild(i).name.Equals(__instance.name)) continue;
-                ModManager.ProcessEnemy(__instance, parent.GetChild(i).GetComponent<SkeletonAnimation>().skeleton);
+                Transform child = parent.GetChild(i);
+                if (child.name.Equals(__instance.name)) continue;
+                ModManager.ProcessEnemy(__instance, child.GetComponent<SkeletonAnimation>().skeleton);
             }
         }
     }
