@@ -7,14 +7,13 @@ using UnityEngine;
 
 namespace FadeIn.Patches
 {
-    [HarmonyPatch(typeof(BaseEnemyObjectController))]
-    internal static class EnemyPatch
+    [HarmonyPatch(typeof(BaseEnemyObjectController), nameof(BaseEnemyObjectController.EnableVisible))]
+    internal static class BaseEnemyPatch
     {
-        [HarmonyPatch(nameof(BaseEnemyObjectController.EnableVisible))]
-        [HarmonyPostfix]
-        public static void PostfixEnableVisible(BaseEnemyObjectController __instance)
+        public static void Postfix(BaseEnemyObjectController __instance)
         {
             if (!SettingsManager.IsEnabled) return;
+
             Skeleton sk = __instance.m_SkeletonAnimation.skeleton;
             Transform parent = __instance.transform.parent;
 
@@ -30,12 +29,13 @@ namespace FadeIn.Patches
     }
 
     [HarmonyPatch(typeof(LongPressController), nameof(LongPressController.SetVisible))]
-    internal static class GetVisibleEnemiesPssddfsfsfsatch
+    internal static class LongPressEnemyPatch
     {
         public static void Postfix(LongPressController __instance, bool enable)
         {
             if (!SettingsManager.IsEnabled) return;
             if (!enable) return;
+
             SpineActionController sac = __instance.m_Sac;
             ModManager.AddCallBackPress(__instance.gameObject, sac.m_StartStar, sac.m_EndStar, sac.m_Mtrl);
         }
