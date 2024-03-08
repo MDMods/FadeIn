@@ -22,26 +22,28 @@ namespace FadeIn.Managers
         private static IEnumerator UpdateAlphaX(Skeleton sk, GameObject gameObject, Bone x, float initialX)
         {
             float lowerLimit = Mathf.Min(MinimalDistanceX, initialX);
-            while (sk.a > 0.01f && x.x > DissapearPositionX && gameObject)
+            while (gameObject)
             {
-                if ((SBC?.isInGame ?? false) && (!SBC?.isPause ?? false))
-                {
-                    UpdateAlphaValue(sk, x.x, MinimalDistanceX, lowerLimit, DissapearPositionX);
-                }
                 yield return WFS;
+                if ((!SBC?.isInGame ?? true) || (SBC?.isPause ?? true)) continue;
+
+                UpdateAlphaValue(sk, x.x, MinimalDistanceX, lowerLimit, DissapearPositionX);
+
+                if (sk.a < 0.01f || x.x < DissapearPositionX) break;
             }
             sk.a = 0f;
         }
 
         private static IEnumerator UpdateAlphaR(Skeleton sk, GameObject gameObject, Bone y, float initialR)
         {
-            while (sk.a > 0.01f && y.rotation > DissapearPositionR && gameObject)
+            while (gameObject)
             {
-                if ((SBC?.isInGame ?? false) && (!SBC?.isPause ?? false))
-                {
-                    UpdateAlphaValue(sk, y.rotation, MinimalDistanceR, initialR, DissapearPositionR);
-                }
                 yield return WFS;
+                if ((!SBC?.isInGame ?? true) || (SBC?.isPause ?? true)) continue;
+
+                UpdateAlphaValue(sk, y.rotation, MinimalDistanceR, initialR, DissapearPositionR);
+
+                if (sk.a < 0.01f || y.rotation < DissapearPositionR) break;
             }
             sk.a = 0f;
         }
@@ -49,16 +51,17 @@ namespace FadeIn.Managers
         private static IEnumerator UpdateAlphaNote(Skeleton sk, GameObject gameObject)
         {
             //Waiting for the proper position
-            yield return null;
+            yield return WFS;
 
-            while (sk.a > 0.01f && gameObject)
+            while (gameObject)
             {
-                if ((SBC?.isInGame ?? false) && (!SBC?.isPause ?? false))
-                {
-                    float x = gameObject?.transform?.position.x ?? -3f;
-                    UpdateAlphaValue(sk, x, MinimalDistanceX, MinimalDistanceX, DissapearPositionX);
-                }
                 yield return WFS;
+                if ((!SBC?.isInGame ?? true) || (SBC?.isPause ?? true)) continue;
+
+                float x = gameObject?.transform?.position.x ?? -3f;
+                UpdateAlphaValue(sk, x, MinimalDistanceX, MinimalDistanceX, DissapearPositionX);
+
+                if (sk.a < 0.01f || x < DissapearPositionX) break;
             }
             sk.a = 0f;
         }

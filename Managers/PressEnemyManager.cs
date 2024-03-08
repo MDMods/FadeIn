@@ -25,18 +25,19 @@ namespace FadeIn.Managers
 
             while (gameObject)
             {
-                if ((SBC?.isInGame ?? false) && (!SBC?.isPause ?? false))
-                {
-                    float startX = gameObject.transform?.position.x ?? -3f;
-                    float endX = transform?.position.x ?? -3f;
-                    UpdateAlphaValuePress(start, ref startColor, startX, MinimalDistanceX, MinimalDistanceX, DissapearPositionX);
-                    UpdateAlphaValuePress(end, ref endColor, endX, MinimalDistanceX, MinimalDistanceX, DissapearPositionX);
-                    mtrl.SetFloat("_Alpha", (startColor.a + endColor.a) / 2);
-
-                    if (startColor.a < 0.01f && endColor.a < 0.01f) break;
-                }
                 yield return WFS;
+                if ((!SBC?.isInGame ?? true) || (SBC?.isPause ?? true)) continue;
+
+                float startX = gameObject.transform?.position.x ?? -3f;
+                float endX = transform?.position.x ?? -3f;
+
+                UpdateAlphaValuePress(start, ref startColor, startX, MinimalDistanceX, MinimalDistanceX, DissapearPositionX);
+                UpdateAlphaValuePress(end, ref endColor, endX, MinimalDistanceX, MinimalDistanceX, DissapearPositionX);
+                mtrl.SetFloat("_Alpha", (startColor.a + endColor.a) / 2);
+
+                if (startColor.a < 0.01f && endColor.a < 0.01f) break;
             }
+
             startColor.a = 0;
             endColor.a = 0;
             start.color = startColor;
@@ -47,22 +48,23 @@ namespace FadeIn.Managers
         {
             Transform startTransform = gameObject.transform;
             float length = endTransform.position.x - startTransform.position.x;
-            float clip = 0f;
+            float clip;
             float startx;
 
-            while (clip < 1f && gameObject)
+            while (gameObject)
             {
-                if ((SBC?.isInGame ?? false) && (!SBC?.isPause ?? false))
-                {
-                    startx = startTransform.position.x;
-                    if (startx <= DissapearPositionX)
-                    {
-                        clip = Mathf.Clamp((DissapearPositionX - startx) / length, 0f, 1f);
-                        mtrl.SetFloat("_ClipValue", clip);
-                    }
-                }
                 yield return WFS;
+                if ((!SBC?.isInGame ?? true) || (SBC?.isPause ?? true)) continue;
+
+                startx = startTransform.position.x;
+                if (startx > DissapearPositionX) continue;
+
+                clip = Mathf.Clamp((DissapearPositionX - startx) / length, 0f, 1f);
+                mtrl.SetFloat("_ClipValue", clip);
+
+                if (clip >= 1f) break;
             }
+
             clip = 1f;
             mtrl.SetFloat("_ClipValue", clip);
         }
