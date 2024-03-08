@@ -32,32 +32,37 @@ namespace FadeIn.Managers
                 };
             }
         }
-        public static float DissapearPositionX { get; set; }
-        public static float DissapearPositionR { get; set; }
-        public static float MinimalDistanceX { get; set; }
-        public static float MinimalDistanceR { get; set; }
+        private static float _dissapearPositionX;
+        private static float _dissapearPositionR;
+        private static float _minimalDistanceX;
+        private static float _minimalDistanceR;
+
+        public static float DissapearPositionX => _dissapearPositionX;
+        public static float DissapearPositionR => _dissapearPositionR;
+        public static float MinimalDistanceX => _minimalDistanceX;
+        public static float MinimalDistanceR => _minimalDistanceR;
 
         internal static void InitValues()
         {
             switch (Difficulty)
             {
                 case Difficulties.Easy:
-                    DissapearPositionX = -1.8f;
-                    DissapearPositionR = 8f;
+                    _dissapearPositionX = -1.8f;
+                    _dissapearPositionR = 8f;
                     break;
 
                 case Difficulties.Medium:
-                    DissapearPositionX = -0.9f;
-                    DissapearPositionR = 20f;
+                    _dissapearPositionX = -0.9f;
+                    _dissapearPositionR = 20f;
                     break;
 
                 case Difficulties.Hard:
-                    DissapearPositionX = 0f;
-                    DissapearPositionR = 35f;
+                    _dissapearPositionX = 0f;
+                    _dissapearPositionR = 35f;
                     break;
             }
-            MinimalDistanceX = 5.8f;
-            MinimalDistanceR = 70f;
+            _minimalDistanceX = 5.8f;
+            _minimalDistanceR = 70f;
 
         }
 
