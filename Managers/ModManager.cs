@@ -171,19 +171,19 @@ namespace FadeIn.Managers
         {
             //Skeleton sk = beoc.m_SkeletonAnimation.skeleton;
 
-            switch (beoc.m_NodeType)
+            switch ((NoteType)beoc.m_NodeType)
             {
-                case (uint)NoteType.Hp:
+                case NoteType.Hp:
                     AddCallBackNote(sk, beoc.gameObject);
                     beoc.Cast<AirEnergyBottleController>().m_Fx.SetActive(false);
                     return;
-                case (uint)NoteType.Music:
+                case NoteType.Music:
                     AddCallBackNote(sk, beoc.gameObject);
                     beoc.Cast<AirMusicNodeController>().m_Fx.SetActive(false);
                     return;
 
                 // Dont do anything with the holds
-                case (uint)NoteType.Press: return;
+                case NoteType.Press: return;
             }
 
             Bone xPos = beoc.m_Sac.bones["X"];
