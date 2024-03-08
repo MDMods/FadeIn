@@ -26,33 +26,18 @@ namespace FadeIn.Patches
                 if (parent.GetChild(i).name.Equals(__instance.name)) continue;
                 ModManager.ProcessEnemy(__instance, parent.GetChild(i).GetComponent<SkeletonAnimation>().skeleton);
             }
-
         }
-
     }
 
-
-    /*
-   [HarmonyPatch(typeof(LongPressController))]
-   internal static class GetVisibleEnemiesPssddfsfsfsatch
-   {
-       // Messing aroudn with holds
-       [HarmonyPostfix]
-       [HarmonyPatch(nameof(LongPressController.SetVisible))]
-       public static void PostfixBEOC(LongPressController __instance, bool enable)
-       {
-           if (!enable) return;
-           //static bool x = false;
-
-           var x = __instance.transform.GetChild(0).gameObject;
-           Melon<Main>.Logger.Msg($"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~1");
-           foreach ( var c in x.GetComponentsInChildren<Component>()) { 
-               Melon<Main>.Logger.Msg( c.ToString() );
-           }
-           __instance.m_Sac.SetAlpha(0.1f);
-           Melon<Main>.Logger.Msg($"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~2");
-
-       }
-   }
-   */
+    [HarmonyPatch(typeof(LongPressController), nameof(LongPressController.SetVisible))]
+    internal static class GetVisibleEnemiesPssddfsfsfsatch
+    {
+        public static void Postfix(LongPressController __instance, bool enable)
+        {
+            if (!SettingsManager.IsEnabled) return;
+            if (!enable) return;
+            SpineActionController sac = __instance.m_Sac;
+            ModManager.AddCallBackPress(__instance.gameObject, sac.m_StartStar, sac.m_EndStar, sac.m_Mtrl);
+        }
+    }
 }
