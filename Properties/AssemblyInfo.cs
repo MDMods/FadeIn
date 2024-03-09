@@ -2,7 +2,7 @@
 using System.Reflection;
 using Main = FadeIn.Main;
 
-[assembly: MelonInfo(typeof(Main), "FadeIn", "1.0.0", "Asgragrt")]
+[assembly: MelonInfo(typeof(Main), "FadeIn", "1.0.1", "Asgragrt")]
 [assembly: MelonGame("PeroPeroGames", "MuseDash")]
 [assembly: MelonColor(255, 241, 196, 15)]
 
