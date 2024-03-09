@@ -35,7 +35,7 @@ namespace FadeIn.Managers
                 UpdateAlphaValuePress(end, ref endColor, endX, MinimalDistanceX, MinimalDistanceX, DissapearPositionX);
                 mtrl.SetFloat("_Alpha", (startColor.a + endColor.a) / 2);
 
-                if (startColor.a < 0.01f && endColor.a < 0.01f) break;
+                if (!gameObject.active) break;
             }
 
             startColor.a = 0;
@@ -62,7 +62,7 @@ namespace FadeIn.Managers
                 clip = Mathf.Clamp((DissapearPositionX - startx) / length, 0f, 1f);
                 mtrl.SetFloat("_ClipValue", clip);
 
-                if (clip >= 1f) break;
+                if (!gameObject.active) break;
             }
 
             clip = 1f;
