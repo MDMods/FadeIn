@@ -1,5 +1,4 @@
-﻿using MelonLoader;
-using MuseDashMirror;
+﻿using MuseDashMirror;
 using MuseDashMirror.EventArguments;
 using UnityEngine;
 using UnityEngine.UI;
@@ -38,7 +37,6 @@ internal static class ToggleManagers
             DisplayText = text;
             ToggleValue = difficulty == SettingsManager.Difficulty;
             Difficulty = difficulty;
-            Melon<Main>.Logger.Msg("BBB " + name);
             PatchEvents.PnlMenuPatch += RegisterToggle;
         }
 
@@ -77,7 +75,7 @@ internal static class ToggleManagers
             }
         }
 
-        private void RegisterToggle(object? sender, PnlMenuEventArgs args)
+        private void RegisterToggle(object sender, PnlMenuEventArgs args)
         {
             ToggleObject =
                 CreatePnlMenuToggle(Name, DisplayText, ToggleValue, new Action<bool>(val => ToggleValue = val));
