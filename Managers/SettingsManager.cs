@@ -2,6 +2,8 @@
 
 namespace FadeIn.Managers;
 
+using static ToggleManagers;
+
 public enum Difficulties
 {
     Easy,
@@ -11,6 +13,8 @@ public enum Difficulties
 
 internal class SettingsManager
 {
+    private const string SettingsPath = "UserData/FadeIn.cfg";
+    
     private static MelonPreferences_Entry<bool> _isEnabled;
 
     internal static bool IsEnabled
@@ -32,6 +36,30 @@ internal class SettingsManager
                 _ => Difficulties.Medium
             };
         }
+        set
+        {
+            switch (value)
+            {
+                case Difficulties.Easy:
+                    _difficulty.Value = "Easy";
+                    DisappearPositionX = -1.8f;
+                    DisappearPositionR = 8f;
+                    break;
+
+                case Difficulties.Hard:
+                    _difficulty.Value = "Hard";
+                    DisappearPositionX = 0f;
+                    DisappearPositionR = 35f;
+                    break;
+
+                case Difficulties.Medium:
+                default:
+                    _difficulty.Value = "Medium";
+                    DisappearPositionX = -0.9f;
+                    DisappearPositionR = 20f;
+                    break;
+            }
+        }
     }
 
     public static float DisappearPositionX { get; private set; }
@@ -41,25 +69,8 @@ internal class SettingsManager
 
     private static void InitValues()
     {
-        switch (Difficulty)
-        {
-            case Difficulties.Easy:
-                DisappearPositionX = -1.8f;
-                DisappearPositionR = 8f;
-                break;
-
-            case Difficulties.Hard:
-                DisappearPositionX = 0f;
-                DisappearPositionR = 35f;
-                break;
-
-            case Difficulties.Medium:
-            default:
-                DisappearPositionX = -0.9f;
-                DisappearPositionR = 20f;
-                break;
-        }
-
+        Difficulty = Difficulty;
+        
         MinimalDistanceX = 5.8f;
         MinimalDistanceR = 70f;
     }
@@ -67,9 +78,15 @@ internal class SettingsManager
     public static void Load()
     {
         var settings = MelonPreferences.CreateCategory("FadeIn");
+        settings.SetFilePath(SettingsPath, true, false);
+        
         _isEnabled = settings.CreateEntry(nameof(IsEnabled), false);
         _difficulty = settings.CreateEntry(nameof(Difficulty), "Medium", description: "Options:\nEasy\nMedium\nHard");
-
+        
         InitValues();
+
+        EzController = new ToggleController("EzToggle", "FadeIn EZ", Difficulties.Easy);
+        MdController = new ToggleController("MdToggle", "FadeIn MD", Difficulties.Medium);
+        HrController = new ToggleController("HrToggle", "FadeIn HR", Difficulties.Hard);
     }
 }
