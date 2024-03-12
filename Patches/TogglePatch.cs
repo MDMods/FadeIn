@@ -5,18 +5,20 @@ using Il2CppAssets.Scripts.PeroTools.GeneralLocalization;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using static FadeIn.Managers.ModManager;
+using MuseDashMirror.Extensions;
 using Nice = Il2CppAssets.Scripts.PeroTools.Nice;
 
 namespace FadeIn.Patches
 {
+    using static ModManager;
+    
     [HarmonyPatch(typeof(PnlPreparation), nameof(PnlPreparation.Awake))]
     internal static class TogglePatch
     {
         public static void Postfix(PnlPreparation __instance)
         {
             if (FadeToggle) return;
-
+            
             FadeToggle = UnityEngine.Object.Instantiate(
                 GameObject.Find("Forward").transform.Find("PnlVolume").Find("LogoSetting").Find("Toggles").Find("TglOn").gameObject,
                 __instance.startButton.transform
