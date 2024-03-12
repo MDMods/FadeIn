@@ -4,14 +4,13 @@ using Il2CppAssets.Scripts.PeroTools.Commons;
 using Il2CppAssets.Scripts.UI.Panels;
 using Il2CppFormulaBase;
 
-namespace FadeIn.Patches
+namespace FadeIn.Patches;
+
+[HarmonyPatch(typeof(PnlBattle), nameof(PnlBattle.Awake))]
+internal static class PnlBattlePatch
 {
-    [HarmonyPatch(typeof(PnlBattle), nameof(PnlBattle.Awake))]
-    internal static class PnlBattlePatch
+    private static void Postfix()
     {
-        private static void Postfix()
-        {
-            ModManager.SBC = Singleton<StageBattleComponent>.instance;
-        }
+        ModManager.SBC = Singleton<StageBattleComponent>.instance;
     }
 }
