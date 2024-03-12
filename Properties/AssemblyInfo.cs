@@ -1,5 +1,5 @@
-﻿using MelonLoader;
-using System.Reflection;
+﻿using System.Reflection;
+using MelonLoader;
 using static FadeIn.Properties.MelonBuildInfo;
 using Main = FadeIn.Main;
 

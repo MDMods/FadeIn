@@ -1,5 +1,5 @@
-﻿using MelonLoader;
-using System.Collections;
+﻿using System.Collections;
+using MelonLoader;
 using UnityEngine;
 
 namespace FadeIn.Managers;
