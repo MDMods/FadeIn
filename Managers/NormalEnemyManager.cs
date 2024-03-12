@@ -86,8 +86,6 @@ internal static class NormalEnemyManager
 
     internal static void ProcessEnemy(BaseEnemyObjectController beoc, Skeleton sk)
     {
-        //Skeleton sk = beoc.m_SkeletonAnimation.skeleton;
-
         switch ((NoteType)beoc.m_NodeType)
         {
             case NoteType.Hp:

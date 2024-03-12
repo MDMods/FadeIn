@@ -17,13 +17,10 @@ internal static class ToggleManagers
 
     internal class ToggleController
     {
-        private static GameObject _toggleObject;
-
         private static Difficulties _toggleGroupValue;
 
         private static Difficulties ToggleGroupValue
         {
-            get => _toggleGroupValue;
             set
             {
                 _toggleGroupValue = value;
@@ -39,7 +36,9 @@ internal static class ToggleManagers
             Difficulty = difficulty;
             PatchEvents.PnlMenuPatch += RegisterToggle;
         }
-
+        
+        private GameObject _toggleObject;
+        
         private Difficulties Difficulty { get; }
 
         private string Name { get; }

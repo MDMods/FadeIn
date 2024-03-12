@@ -18,7 +18,7 @@ using static ModManager;
 [HarmonyPatch(typeof(PnlPreparation), nameof(PnlPreparation.Awake))]
 internal static class TogglePatch
 {
-    public static void Postfix(PnlPreparation __instance)
+    internal static void Postfix(PnlPreparation __instance)
     {
         if (FadeToggle) return;
 

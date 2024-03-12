@@ -9,7 +9,7 @@ namespace FadeIn.Patches;
 [HarmonyPatch(typeof(PnlBattle), nameof(PnlBattle.Awake))]
 internal static class PnlBattlePatch
 {
-    private static void Postfix()
+    internal static void Postfix()
     {
         ModManager.SBC = Singleton<StageBattleComponent>.instance;
     }

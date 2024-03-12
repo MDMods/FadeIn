@@ -6,7 +6,7 @@ namespace FadeIn.Managers;
 
 internal static partial class ModManager
 {
-    public static GameObject FadeToggle = null;
+    internal static GameObject FadeToggle { get; set; }
     public static StageBattleComponent SBC { get; set; } = null;
 
     // Coroutines

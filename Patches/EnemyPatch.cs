@@ -8,7 +8,7 @@ namespace FadeIn.Patches;
 [HarmonyPatch(typeof(BaseEnemyObjectController), nameof(BaseEnemyObjectController.EnableVisible))]
 internal static class BaseEnemyPatch
 {
-    public static void Postfix(BaseEnemyObjectController __instance)
+    internal static void Postfix(BaseEnemyObjectController __instance)
     {
         if (!SettingsManager.IsEnabled) return;
 
@@ -31,7 +31,7 @@ internal static class BaseEnemyPatch
 [HarmonyPatch(typeof(LongPressController), nameof(LongPressController.SetVisible))]
 internal static class LongPressEnemyPatch
 {
-    public static void Postfix(LongPressController __instance, bool enable)
+    internal static void Postfix(LongPressController __instance, bool enable)
     {
         if (!SettingsManager.IsEnabled) return;
         if (!enable) return;
