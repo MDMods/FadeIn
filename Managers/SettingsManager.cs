@@ -32,38 +32,34 @@ namespace FadeIn.Managers
                 };
             }
         }
-        private static float _disappearPositionX;
-        private static float _disappearPositionR;
-        private static float _minimalDistanceX;
-        private static float _minimalDistanceR;
 
-        public static float DisappearPositionX => _disappearPositionX;
-        public static float DisappearPositionR => _disappearPositionR;
-        public static float MinimalDistanceX => _minimalDistanceX;
-        public static float MinimalDistanceR => _minimalDistanceR;
+        public static float DisappearPositionX { get; private set; }
+        public static float DisappearPositionR { get; private set; }
+        public static float MinimalDistanceX { get; private set; }
+        public static float MinimalDistanceR { get; private set; }
 
-        internal static void InitValues()
+        private static void InitValues()
         {
             switch (Difficulty)
             {
                 case Difficulties.Easy:
-                    _disappearPositionX = -1.8f;
-                    _disappearPositionR = 8f;
-                    break;
-
-                case Difficulties.Medium:
-                    _disappearPositionX = -0.9f;
-                    _disappearPositionR = 20f;
+                    DisappearPositionX = -1.8f;
+                    DisappearPositionR = 8f;
                     break;
 
                 case Difficulties.Hard:
-                    _disappearPositionX = 0f;
-                    _disappearPositionR = 35f;
+                    DisappearPositionX = 0f;
+                    DisappearPositionR = 35f;
+                    break;
+                
+                case Difficulties.Medium:
+                default:
+                    DisappearPositionX = -0.9f;
+                    DisappearPositionR = 20f;
                     break;
             }
-            _minimalDistanceX = 5.8f;
-            _minimalDistanceR = 70f;
-
+            MinimalDistanceX = 5.8f;
+            MinimalDistanceR = 70f;
         }
 
         public static void Load()
