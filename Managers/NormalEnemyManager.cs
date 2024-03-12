@@ -27,9 +27,9 @@ namespace FadeIn.Managers
                 yield return WFS;
                 if ((!SBC?.isInGame ?? true) || (SBC?.isPause ?? true)) continue;
 
-                UpdateAlphaValue(sk, x.x, MinimalDistanceX, lowerLimit, DissapearPositionX);
+                UpdateAlphaValue(sk, x.x, MinimalDistanceX, lowerLimit, DisappearPositionX);
 
-                if (sk.a < 0.01f || x.x < DissapearPositionX) break;
+                if (sk.a < 0.01f || x.x < DisappearPositionX) break;
             }
             sk.a = 0f;
         }
@@ -41,9 +41,9 @@ namespace FadeIn.Managers
                 yield return WFS;
                 if ((!SBC?.isInGame ?? true) || (SBC?.isPause ?? true)) continue;
 
-                UpdateAlphaValue(sk, y.rotation, MinimalDistanceR, initialR, DissapearPositionR);
+                UpdateAlphaValue(sk, y.rotation, MinimalDistanceR, initialR, DisappearPositionR);
 
-                if (sk.a < 0.01f || y.rotation < DissapearPositionR) break;
+                if (sk.a < 0.01f || y.rotation < DisappearPositionR) break;
             }
             sk.a = 0f;
         }
@@ -59,9 +59,9 @@ namespace FadeIn.Managers
                 if ((!SBC?.isInGame ?? true) || (SBC?.isPause ?? true)) continue;
 
                 float x = gameObject?.transform?.position.x ?? -3f;
-                UpdateAlphaValue(sk, x, MinimalDistanceX, MinimalDistanceX, DissapearPositionX);
+                UpdateAlphaValue(sk, x, MinimalDistanceX, MinimalDistanceX, DisappearPositionX);
 
-                if (sk.a < 0.01f || x < DissapearPositionX) break;
+                if (sk.a < 0.01f || x < DisappearPositionX) break;
             }
             sk.a = 0f;
         }

@@ -15,8 +15,8 @@ namespace FadeIn.Managers
 
         internal static bool IsEnabled
         {
-            get { return _isEnabled.Value; }
-            set { _isEnabled.Value = value; }
+            get => _isEnabled.Value;
+            set => _isEnabled.Value = value;
         }
 
         private static MelonPreferences_Entry<string> _difficulty;
@@ -32,13 +32,13 @@ namespace FadeIn.Managers
                 };
             }
         }
-        private static float _dissapearPositionX;
-        private static float _dissapearPositionR;
+        private static float _disappearPositionX;
+        private static float _disappearPositionR;
         private static float _minimalDistanceX;
         private static float _minimalDistanceR;
 
-        public static float DissapearPositionX => _dissapearPositionX;
-        public static float DissapearPositionR => _dissapearPositionR;
+        public static float DisappearPositionX => _disappearPositionX;
+        public static float DisappearPositionR => _disappearPositionR;
         public static float MinimalDistanceX => _minimalDistanceX;
         public static float MinimalDistanceR => _minimalDistanceR;
 
@@ -47,18 +47,18 @@ namespace FadeIn.Managers
             switch (Difficulty)
             {
                 case Difficulties.Easy:
-                    _dissapearPositionX = -1.8f;
-                    _dissapearPositionR = 8f;
+                    _disappearPositionX = -1.8f;
+                    _disappearPositionR = 8f;
                     break;
 
                 case Difficulties.Medium:
-                    _dissapearPositionX = -0.9f;
-                    _dissapearPositionR = 20f;
+                    _disappearPositionX = -0.9f;
+                    _disappearPositionR = 20f;
                     break;
 
                 case Difficulties.Hard:
-                    _dissapearPositionX = 0f;
-                    _dissapearPositionR = 35f;
+                    _disappearPositionX = 0f;
+                    _disappearPositionR = 35f;
                     break;
             }
             _minimalDistanceX = 5.8f;

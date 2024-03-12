@@ -31,8 +31,8 @@ namespace FadeIn.Managers
                 float startX = gameObject.transform?.position.x ?? -3f;
                 float endX = transform?.position.x ?? -3f;
 
-                UpdateAlphaValuePress(start, ref startColor, startX, MinimalDistanceX, MinimalDistanceX, DissapearPositionX);
-                UpdateAlphaValuePress(end, ref endColor, endX, MinimalDistanceX, MinimalDistanceX, DissapearPositionX);
+                UpdateAlphaValuePress(start, ref startColor, startX, MinimalDistanceX, MinimalDistanceX, DisappearPositionX);
+                UpdateAlphaValuePress(end, ref endColor, endX, MinimalDistanceX, MinimalDistanceX, DisappearPositionX);
                 mtrl.SetFloat("_Alpha", (startColor.a + endColor.a) / 2);
 
                 if (!gameObject.active) break;
@@ -57,9 +57,9 @@ namespace FadeIn.Managers
                 if ((!SBC?.isInGame ?? true) || (SBC?.isPause ?? true)) continue;
 
                 startx = startTransform.position.x;
-                if (startx > DissapearPositionX) continue;
+                if (startx > DisappearPositionX) continue;
 
-                clip = Mathf.Clamp((DissapearPositionX - startx) / length, 0f, 1f);
+                clip = Mathf.Clamp((DisappearPositionX - startx) / length, 0f, 1f);
                 mtrl.SetFloat("_ClipValue", clip);
 
                 if (!gameObject.active) break;
