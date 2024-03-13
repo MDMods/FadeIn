@@ -17,17 +17,6 @@ internal static class ToggleManagers
 
     internal class ToggleController
     {
-        private static Difficulties _toggleGroupValue;
-
-        private static Difficulties ToggleGroupValue
-        {
-            set
-            {
-                _toggleGroupValue = value;
-                SettingsManager.Difficulty = _toggleGroupValue;
-            }
-        }
-
         internal ToggleController(string name, string text, Difficulties difficulty)
         {
             Name = name;
@@ -53,7 +42,7 @@ internal static class ToggleManagers
             {
                 _toggleValue = value;
                 if (!_toggleValue) return;
-                ToggleGroupValue = Difficulty;
+                SettingsManager.Difficulty = Difficulty;
             }
         }
 

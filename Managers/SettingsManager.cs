@@ -4,16 +4,18 @@ namespace FadeIn.Managers;
 
 using static ToggleManagers;
 
-public enum Difficulties
+internal enum Difficulties
 {
     Easy,
     Medium,
     Hard
 }
 
-internal class SettingsManager
+internal static class SettingsManager
 {
     private const string SettingsPath = "UserData/FadeIn.cfg";
+
+    internal const float AlphaLowerLimit = 0.005f;
     
     private static MelonPreferences_Entry<bool> _isEnabled;
 
@@ -24,21 +26,16 @@ internal class SettingsManager
     }
 
     private static MelonPreferences_Entry<string> _difficulty;
+    private static Difficulties _currentDifficulty;
 
     internal static Difficulties Difficulty
     {
-        get
-        {
-            return _difficulty.Value switch
-            {
-                "Easy" => Difficulties.Easy,
-                "Hard" => Difficulties.Hard,
-                _ => Difficulties.Medium
-            };
-        }
+        get => _currentDifficulty;
+        
         set
         {
-            switch (value)
+            _currentDifficulty = value;
+            switch (_currentDifficulty)
             {
                 case Difficulties.Easy:
                     _difficulty.Value = "Easy";
@@ -51,8 +48,7 @@ internal class SettingsManager
                     DisappearPositionX = 0f;
                     DisappearPositionR = 35f;
                     break;
-
-                case Difficulties.Medium:
+                
                 default:
                     _difficulty.Value = "Medium";
                     DisappearPositionX = -0.9f;
@@ -62,20 +58,25 @@ internal class SettingsManager
         }
     }
 
-    public static float DisappearPositionX { get; private set; }
-    public static float DisappearPositionR { get; private set; }
-    public static float MinimalDistanceX { get; private set; }
-    public static float MinimalDistanceR { get; private set; }
+    internal static float DisappearPositionX { get; private set; }
+    internal static float DisappearPositionR { get; private set; }
+    internal static float MinimalDistanceX { get; private set; }
+    internal static float MinimalDistanceR { get; private set; }
 
     private static void InitValues()
     {
-        Difficulty = Difficulty;
+        Difficulty = _difficulty.Value switch
+        {
+            "Easy" => Difficulties.Easy,
+            "Hard" => Difficulties.Hard,
+            _ => Difficulties.Medium
+        };
         
         MinimalDistanceX = 5.8f;
         MinimalDistanceR = 70f;
     }
 
-    public static void Load()
+    internal static void Load()
     {
         var settings = MelonPreferences.CreateCategory("FadeIn");
         settings.SetFilePath(SettingsPath, true, false);
@@ -85,8 +86,8 @@ internal class SettingsManager
         
         InitValues();
 
-        EzController = new ToggleController("EzToggle", "FadeIn EZ", Difficulties.Easy);
-        MdController = new ToggleController("MdToggle", "FadeIn MD", Difficulties.Medium);
-        HrController = new ToggleController("HrToggle", "FadeIn HR", Difficulties.Hard);
+        EzController = new ToggleController("EzToggle", "FadeIn <color=#00800096>Easy</color>", Difficulties.Easy);
+        MdController = new ToggleController("MdToggle", "FadeIn <color=#AAAA0096>Med</color>", Difficulties.Medium);
+        HrController = new ToggleController("HrToggle", "FadeIn <color=#AA000096>Hard</color>", Difficulties.Hard);
     }
 }
