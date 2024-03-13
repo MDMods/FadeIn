@@ -17,12 +17,12 @@ internal static class BaseEnemyPatch
 
         var parent = __instance.transform.parent;
         if (parent.name.Equals("SceneObjectController")) return;
-        
+
         for (var i = 0; i < parent.childCount; i++)
         {
             var child = parent.GetChild(i);
             if (child.name.Equals(__instance.name)) continue;
-            
+
             NormalEnemyManager.ProcessEnemy(__instance, child.GetComponent<SkeletonAnimation>().skeleton);
         }
     }

@@ -16,7 +16,7 @@ internal static class ToggleManagers
     private static GameObject DiffGroup { get; set; }
 
     internal class ToggleController
-    {
+    { 
         internal ToggleController(string name, string text, Difficulties difficulty)
         {
             Name = name;
@@ -26,26 +26,11 @@ internal static class ToggleManagers
             PatchEvents.PnlMenuPatch += RegisterToggle;
         }
         
-        private GameObject _toggleObject;
-        
-        private Difficulties Difficulty { get; }
-
         private string Name { get; }
         private string DisplayText { get; }
-
-        private bool _toggleValue;
-
-        internal bool ToggleValue
-        {
-            get => _toggleValue;
-            set
-            {
-                _toggleValue = value;
-                if (!_toggleValue) return;
-                SettingsManager.Difficulty = Difficulty;
-            }
-        }
-
+        private Difficulties Difficulty { get; }
+        
+        private GameObject _toggleObject;
         internal GameObject ToggleObject
         {
             get => _toggleObject;
@@ -62,7 +47,19 @@ internal static class ToggleManagers
                 toggle.group = DiffGroup.GetComponent<ToggleGroup>();
             }
         }
-
+        
+        private bool _toggleValue;
+        internal bool ToggleValue
+        {
+            get => _toggleValue;
+            set
+            {
+                _toggleValue = value;
+                if (!_toggleValue) return;
+                SettingsManager.Difficulty = Difficulty;
+            }
+        }
+        
         private void RegisterToggle(object sender, PnlMenuEventArgs args)
         {
             ToggleObject =

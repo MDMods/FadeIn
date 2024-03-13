@@ -16,9 +16,8 @@ internal static class SettingsManager
     private const string SettingsPath = "UserData/FadeIn.cfg";
 
     internal const float AlphaLowerLimit = 0.005f;
-    
-    private static MelonPreferences_Entry<bool> _isEnabled;
 
+    private static MelonPreferences_Entry<bool> _isEnabled;
     internal static bool IsEnabled
     {
         get => _isEnabled.Value;
@@ -27,11 +26,10 @@ internal static class SettingsManager
 
     private static MelonPreferences_Entry<string> _difficulty;
     private static Difficulties _currentDifficulty;
-
     internal static Difficulties Difficulty
     {
         get => _currentDifficulty;
-        
+
         set
         {
             _currentDifficulty = value;
@@ -48,7 +46,7 @@ internal static class SettingsManager
                     DisappearPositionX = 0f;
                     DisappearPositionR = 35f;
                     break;
-                
+
                 default:
                     _difficulty.Value = "Medium";
                     DisappearPositionX = -0.9f;
@@ -71,7 +69,7 @@ internal static class SettingsManager
             "Hard" => Difficulties.Hard,
             _ => Difficulties.Medium
         };
-        
+
         MinimalDistanceX = 5.8f;
         MinimalDistanceR = 70f;
     }
@@ -80,10 +78,10 @@ internal static class SettingsManager
     {
         var settings = MelonPreferences.CreateCategory("FadeIn");
         settings.SetFilePath(SettingsPath, true, false);
-        
+
         _isEnabled = settings.CreateEntry(nameof(IsEnabled), false);
         _difficulty = settings.CreateEntry(nameof(Difficulty), "Medium", description: "Options:\nEasy\nMedium\nHard");
-        
+
         InitValues();
 
         EzController = new ToggleController("EzToggle", "FadeIn <color=#00800096>Easy</color>", Difficulties.Easy);
