@@ -7,12 +7,13 @@ namespace FadeIn.Managers;
 internal static partial class ModManager
 {
     internal static GameObject FadeToggle { get; set; }
-    public static StageBattleComponent SBC { get; set; } = null;
+    internal static StageBattleComponent StageBattleComponent { get; set; } = null;
+    internal static bool IsPause => (!StageBattleComponent?.isInGame ?? true) || (StageBattleComponent?.isPause ?? true);
 
     // Coroutines
     internal static readonly List<object> CoroutinesList = new();
 
-    public static void ClearCoroutines()
+    internal static void ClearCoroutines()
     {
         foreach (var coroutine in CoroutinesList) MelonCoroutines.Stop(coroutine);
         CoroutinesList.Clear();
@@ -21,11 +22,10 @@ internal static partial class ModManager
     // Holds 
     internal static readonly HashSet<string> PressList = new();
 
-    public static void ClearPress()
+    internal static void ClearPress()
     {
         PressList.Clear();
     }
-
-    //private static readonly WaitForSeconds WFS = new WaitForSeconds(0.05f);
-    internal static readonly WaitForSeconds WFS = null;
+    
+    internal static readonly WaitForEndOfFrame CoroutineWait = new();
 }

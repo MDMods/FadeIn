@@ -11,6 +11,6 @@ internal static class PnlBattlePatch
 {
     internal static void Postfix()
     {
-        ModManager.SBC = Singleton<StageBattleComponent>.instance;
+        ModManager.StageBattleComponent = Singleton<StageBattleComponent>.instance;
     }
 }

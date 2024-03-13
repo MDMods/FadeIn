@@ -32,8 +32,8 @@ internal static class PressEnemyManager
 
         while (gameObject)
         {
-            yield return WFS;
-            if ((!SBC?.isInGame ?? true) || (SBC?.isPause ?? true)) continue;
+            yield return CoroutineWait;
+            if (IsPause) continue;
 
             var startX = gameObject.transform.position.x;
             var endX = transform.position.x;
@@ -61,8 +61,8 @@ internal static class PressEnemyManager
 
         while (gameObject)
         {
-            yield return WFS;
-            if ((!SBC?.isInGame ?? true) || (SBC?.isPause ?? true)) continue;
+            yield return CoroutineWait;
+            if (IsPause) continue;
 
             startx = startTransform.position.x;
             if (startx > DisappearPositionX) continue;

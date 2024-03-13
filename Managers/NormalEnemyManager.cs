@@ -27,12 +27,12 @@ internal static class NormalEnemyManager
         var lowerLimit = Mathf.Min(MinimalDistanceX, initialX);
         while (gameObject)
         {
-            yield return WFS;
-            if ((!SBC?.isInGame ?? true) || (SBC?.isPause ?? true)) continue;
+            yield return CoroutineWait;
+            if (IsPause) continue;
 
             UpdateAlphaValue(sk, x.x, MinimalDistanceX, lowerLimit, DisappearPositionX);
 
-            if (sk.a < 0.01f || x.x < DisappearPositionX) break;
+            if (sk.a < AlphaLowerLimit || x.x < DisappearPositionX) break;
         }
 
         sk.a = 0f;
@@ -42,12 +42,12 @@ internal static class NormalEnemyManager
     {
         while (gameObject)
         {
-            yield return WFS;
-            if ((!SBC?.isInGame ?? true) || (SBC?.isPause ?? true)) continue;
+            yield return CoroutineWait;
+            if (IsPause) continue;
 
             UpdateAlphaValue(sk, y.rotation, MinimalDistanceR, initialR, DisappearPositionR);
 
-            if (sk.a < 0.01f || y.rotation < DisappearPositionR) break;
+            if (sk.a < AlphaLowerLimit || y.rotation < DisappearPositionR) break;
         }
 
         sk.a = 0f;
@@ -56,17 +56,17 @@ internal static class NormalEnemyManager
     private static IEnumerator UpdateAlphaNote(Skeleton sk, GameObject gameObject)
     {
         //Waiting for the proper position
-        yield return WFS;
+        yield return CoroutineWait;
 
         while (gameObject)
         {
-            yield return WFS;
-            if ((!SBC?.isInGame ?? true) || (SBC?.isPause ?? true)) continue;
+            yield return CoroutineWait;
+            if (IsPause) continue;
 
             var x = gameObject.transform.position.x;
             UpdateAlphaValue(sk, x, MinimalDistanceX, MinimalDistanceX, DisappearPositionX);
 
-            if (sk.a < 0.01f || x < DisappearPositionX) break;
+            if (sk.a < AlphaLowerLimit || x < DisappearPositionX) break;
         }
 
         sk.a = 0f;
