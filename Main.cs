@@ -17,6 +17,6 @@ public class Main : MelonMod
         base.OnSceneWasLoaded(buildIndex, sceneName);
         if (sceneName.Equals("GameMain")) return;
         ModManager.ClearCoroutines();
-        ModManager.ClearPress();
+        PressEnemyManager.ClearPress();
     }
 }
