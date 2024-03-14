@@ -2,7 +2,8 @@
 
 namespace FadeIn.Managers;
 
-using static ToggleManagers;
+using Models;
+using static TogglesManager;
 
 internal enum Difficulties
 {
