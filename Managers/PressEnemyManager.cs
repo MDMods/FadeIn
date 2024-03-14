@@ -68,6 +68,7 @@ internal static class PressEnemyManager
 
         while (gameObject)
         {
+            // If it waits until the end of frame, it doesn't work properly
             yield return null;
             if (IsPause) continue;
 
