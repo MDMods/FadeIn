@@ -13,7 +13,7 @@ using Text = UnityEngine.UI.Text;
 
 namespace FadeIn.Patches;
 
-using static ModManager;
+using static TogglesManager;
 
 [HarmonyPatch(typeof(PnlPreparation), nameof(PnlPreparation.Awake))]
 internal static class TogglePatch

@@ -7,7 +7,6 @@ namespace FadeIn.Managers;
 internal static class ModManager
 {
     internal static readonly WaitForEndOfFrame CoroutineWait = new();
-    internal static GameObject FadeToggle { get; set; }
     internal static StageBattleComponent StageBattleComponent { get; set; } = null;
     
     internal static bool IsPause =>

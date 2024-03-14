@@ -2,9 +2,6 @@
 
 namespace FadeIn.Managers;
 
-using Models;
-using static TogglesManager;
-
 internal enum Difficulties
 {
     Easy,
@@ -24,7 +21,7 @@ internal static class SettingsManager
         get => _isEnabled.Value;
         set => _isEnabled.Value = value;
     }
-
+    
     private static MelonPreferences_Entry<string> _difficulty;
     private static Difficulties _currentDifficulty;
     internal static Difficulties Difficulty

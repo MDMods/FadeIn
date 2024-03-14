@@ -52,7 +52,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="MuseDashMirror" Version="3.1.3" />
+        <PackageReference Include="MuseDashMirror" Version="3.1.3"/>
     </ItemGroup>
 
 </Project>
