@@ -84,9 +84,5 @@ internal static class SettingsManager
         _difficulty = settings.CreateEntry(nameof(Difficulty), "Medium", description: "Options:\nEasy\nMedium\nHard");
 
         InitValues();
-
-        EzController = new ToggleController("EzToggle", "FadeIn <color=#00800096>Easy</color>", Difficulties.Easy);
-        MdController = new ToggleController("MdToggle", "FadeIn <color=#AAAA0096>Med</color>", Difficulties.Medium);
-        HrController = new ToggleController("HrToggle", "FadeIn <color=#AA000096>Hard</color>", Difficulties.Hard);
     }
 }

@@ -9,6 +9,7 @@ public class Main : MelonMod
     {
         base.OnInitializeMelon();
         SettingsManager.Load();
+        TogglesManager.Init();
         LoggerInstance.Msg("FadeIn has loaded correctly!");
     }
 
