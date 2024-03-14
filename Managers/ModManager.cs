@@ -21,11 +21,4 @@ internal static class ModManager
         foreach (var coroutine in CoroutinesList) MelonCoroutines.Stop(coroutine);
         CoroutinesList.Clear();
     }
-
-    // Holds 
-    internal static readonly HashSet<string> PressList = new();
-    internal static void ClearPress()
-    {
-        PressList.Clear();
-    }
 }

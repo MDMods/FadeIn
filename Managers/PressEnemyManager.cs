@@ -9,6 +9,13 @@ using static SettingsManager;
 
 internal static class PressEnemyManager
 {
+    // Holds 
+    private static readonly HashSet<string> PressList = new();
+    internal static void ClearPress()
+    {
+        PressList.Clear();
+    }
+    
     private static readonly int Alpha = Shader.PropertyToID("_Alpha");
     private static readonly int ClipValue = Shader.PropertyToID("_ClipValue");
 
@@ -61,7 +68,7 @@ internal static class PressEnemyManager
 
         while (gameObject)
         {
-            yield return CoroutineWait;
+            yield return null;
             if (IsPause) continue;
 
             startx = startTransform.position.x;
