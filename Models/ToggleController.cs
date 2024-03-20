@@ -1,6 +1,4 @@
 ﻿using FadeIn.Managers;
-using MuseDashMirror;
-using MuseDashMirror.EventArguments;
 using UnityEngine;
 using UnityEngine.UI;
 using static MuseDashMirror.UIComponents.ToggleUtils;
@@ -9,8 +7,6 @@ namespace FadeIn.Models;
 
 internal class ToggleController
 {
-    private GameObject _toggleObject;
-
     private bool _toggleValue;
 
     internal ToggleController(string name, string text, Difficulties difficulty)
@@ -19,33 +15,40 @@ internal class ToggleController
         DisplayText = text;
         ToggleValue = difficulty == SettingsManager.Difficulty;
         Difficulty = difficulty;
-        PatchEvents.PnlMenuPatch += RegisterToggle;
+        //PatchEvents.PnlMenuPatch += RegisterToggle;
+        TogglesList.Add(this);
     }
 
-    private static GameObject DiffGroup { get; set; }
+    private static List<ToggleController> TogglesList { get; } = new();
+
+    private static GameObject DiffTogglesGroupGameObject { get; set; }
+    private static ToggleGroup DiffTogglesGroup { get; set; }
 
     private string Name { get; }
     private string DisplayText { get; }
     private Difficulties Difficulty { get; }
 
+    /*
     internal GameObject ToggleObject
     {
         get => _toggleObject;
         private set
         {
             _toggleObject = value;
-            if (!DiffGroup)
+            if (!DiffTogglesGroup)
             {
-                DiffGroup = new GameObject("FadeInToggleGroup");
-                DiffGroup.AddComponent<ToggleGroup>();
+                DiffTogglesGroup = new GameObject("FadeInToggleGroup");
+                DiffTogglesGroup.AddComponent<ToggleGroup>();
             }
 
             if (!_toggleObject.TryGetComponent(out Toggle toggle)) return;
-            toggle.group = DiffGroup.GetComponent<ToggleGroup>();
+            toggle.group = DiffTogglesGroup.GetComponent<ToggleGroup>();
         }
     }
+    */
+    internal GameObject ToggleObject { get; private set; }
 
-    internal bool ToggleValue
+    private bool ToggleValue
     {
         get => _toggleValue;
         set
@@ -56,7 +59,25 @@ internal class ToggleController
         }
     }
 
-    private void RegisterToggle(object sender, PnlMenuEventArgs args)
+    internal static void InitToggles()
+    {
+        if (!DiffTogglesGroupGameObject)
+        {
+            DiffTogglesGroupGameObject = new GameObject("FadeInToggleGroup");
+            DiffTogglesGroup = DiffTogglesGroupGameObject.AddComponent<ToggleGroup>();
+        }
+
+        DiffTogglesGroup.allowSwitchOff = true;
+        foreach (var toggle in TogglesList)
+        {
+            toggle.RegisterToggle();
+            if (!toggle.ToggleObject.TryGetComponent(out Toggle toggleComponent)) continue;
+            toggleComponent.group = DiffTogglesGroup;
+        }
+        DiffTogglesGroup.allowSwitchOff = false;
+    }
+
+    private void RegisterToggle()
     {
         ToggleObject =
             CreatePnlMenuToggle(Name, DisplayText, ToggleValue, new Action<bool>(val => ToggleValue = val));

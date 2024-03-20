@@ -21,7 +21,8 @@ internal static class TogglePatch
     internal static void Postfix(PnlPreparation __instance)
     {
         if (FadeToggle) return;
-
+        CreateEnableToggle(__instance.startButton.transform);
+        /*
         FadeToggle = Object.Instantiate(
             GameObject.Find("Forward").transform.Find("PnlVolume").Find("LogoSetting").Find("Toggles").Find("TglOn")
                 .gameObject,
@@ -58,5 +59,6 @@ internal static class TogglePatch
         FadeToggle.GetComponent<OnToggleOn>().Destroy();
         FadeToggle.GetComponent<OnActivate>().Destroy();
         FadeToggle.GetComponent<VariableBehaviour>().Destroy();
+        */
     }
 }
