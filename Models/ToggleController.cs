@@ -15,7 +15,6 @@ internal class ToggleController
         DisplayText = text;
         ToggleValue = difficulty == SettingsManager.Difficulty;
         Difficulty = difficulty;
-        //PatchEvents.PnlMenuPatch += RegisterToggle;
         TogglesList.Add(this);
     }
 
@@ -28,24 +27,6 @@ internal class ToggleController
     private string DisplayText { get; }
     private Difficulties Difficulty { get; }
 
-    /*
-    internal GameObject ToggleObject
-    {
-        get => _toggleObject;
-        private set
-        {
-            _toggleObject = value;
-            if (!DiffTogglesGroup)
-            {
-                DiffTogglesGroup = new GameObject("FadeInToggleGroup");
-                DiffTogglesGroup.AddComponent<ToggleGroup>();
-            }
-
-            if (!_toggleObject.TryGetComponent(out Toggle toggle)) return;
-            toggle.group = DiffTogglesGroup.GetComponent<ToggleGroup>();
-        }
-    }
-    */
     internal GameObject ToggleObject { get; private set; }
 
     private bool ToggleValue
