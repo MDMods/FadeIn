@@ -27,3 +27,5 @@ some [effects disabled](https://github.com/MDMods/SelectiveEffects).
 ## Limitations
 
 * Maybe performance issues ¯\\_(ツ)_/¯
+
+##  ❗Check out my other [mods](https://github.com/Asgragrt#musedash-modding)❗
