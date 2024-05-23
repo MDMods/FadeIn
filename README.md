@@ -2,6 +2,8 @@
 
 Difficulty increase mod for md.
 
+## ❗Check out my other [mods](https://github.com/Asgragrt/AsgraMDMods/blob/main/README.md)❗
+
 ## Features
 
 * Fade in incoming notes.
@@ -27,5 +29,3 @@ some [effects disabled](https://github.com/MDMods/SelectiveEffects).
 ## Limitations
 
 * Maybe performance issues ¯\\_(ツ)_/¯
-
-##  ❗Check out my other [mods](https://github.com/Asgragrt#musedash-modding)❗
