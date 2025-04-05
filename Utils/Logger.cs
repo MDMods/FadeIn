@@ -7,18 +7,26 @@ namespace FadeIn.Utilities;
 
 internal class Logger
 {
-    private readonly MelonLogger.Instance _logger = Melon<Main>.Logger;
+    internal static Logger Instance { get; } = new Logger();
 
-    private static readonly Color LogColor = Color.FromArgb(
-        MelonBuildInfo.ModColorAlpha,
-        MelonBuildInfo.ModColorRed,
-        MelonBuildInfo.ModColorGreen,
-        MelonBuildInfo.ModColorBlue
-    );
+    private readonly MelonLogger.Instance _logger;
 
-    internal Logger(string className)
+    internal Logger(string name)
     {
-        _logger = new MelonLogger.Instance($"{MelonBuildInfo.ModName}.{className}", LogColor);
+        _logger = new MelonLogger.Instance(
+            $"{MelonBuildInfo.ModName}.{name}",
+            Color.FromArgb(
+                MelonBuildInfo.ModColorAlpha,
+                MelonBuildInfo.ModColorRed,
+                MelonBuildInfo.ModColorGreen,
+                MelonBuildInfo.ModColorBlue
+            )
+        );
+    }
+
+    internal Logger()
+    {
+        _logger = Melon<Main>.Logger;
     }
 
     internal void Debug(object message)

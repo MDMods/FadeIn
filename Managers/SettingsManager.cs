@@ -37,11 +37,11 @@ internal static class SettingsManager
     #endregion
 
     #region fields
-    private static MelonPreferences_Category _category;
-    private static MelonPreferences_Entry<bool> _debug;
-    private static EnumEntry<Difficulty> _difficulty;
-    private static EnumEntry<Mode> _fadeMode;
-    private static MelonPreferences_Entry<bool> _isEnabled;
+    private static readonly MelonPreferences_Category _category;
+    private static readonly MelonPreferences_Entry<bool> _debug;
+    private static readonly EnumEntry<Difficulty> _difficulty;
+    private static readonly EnumEntry<Mode> _fadeMode;
+    private static readonly MelonPreferences_Entry<bool> _isEnabled;
     private static DifficultySettings difficultySettings;
     private static readonly DifficultySettings Easy = new(-1.8f, 8f);
     private static readonly DifficultySettings Hard = new(0f, 35f);
