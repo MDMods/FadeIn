@@ -1,4 +1,5 @@
 ﻿using FadeIn.Properties;
+using FadeIn.Utilities;
 using MelonLoader;
 using MelonLoader.Preferences;
 using MelonLoader.Utils;
@@ -20,6 +21,7 @@ internal static class SettingsManager
     internal const string Path = "UserData/" + FileName;
 
     #region properties
+    internal static bool Debug => _debug.Value;
     internal static float DisappearR => difficultySettings.DisappearR;
     internal static float DisappearX => difficultySettings.DisappearX;
     internal static Mode FadeMode => _fadeMode.Value;
@@ -36,24 +38,20 @@ internal static class SettingsManager
 
     #region fields
     private static MelonPreferences_Category _category;
+    private static MelonPreferences_Entry<bool> _debug;
     private static EnumEntry<Difficulty> _difficulty;
     private static EnumEntry<Mode> _fadeMode;
     private static MelonPreferences_Entry<bool> _isEnabled;
     private static DifficultySettings difficultySettings;
     private static readonly DifficultySettings Easy = new(-1.8f, 8f);
     private static readonly DifficultySettings Hard = new(0f, 35f);
+    private static readonly Logger logger = new(nameof(SettingsManager));
     private static readonly DifficultySettings Medium = new(-0.9f, 20f);
     private static readonly FileSystemWatcher Watcher = new(MelonEnvironment.UserDataDirectory);
     #endregion
 
-    static SettingsManager() { }
-
-    #region methods
-
-    internal static void Init()
+    static SettingsManager()
     {
-        WatcherConfig();
-
         _category = MelonPreferences.CreateCategory(MelonBuildInfo.ModName);
         _category.SetFilePath(Path, false, false);
 
@@ -63,8 +61,22 @@ internal static class SettingsManager
             description: "Enable or disable the mod!"
         );
 
-        _difficulty = new EnumEntry<Difficulty>(_category, "Difficulty", Difficulty.Medium);
-        _fadeMode = new EnumEntry<Mode>(_category, "FadeMode", Mode.FadeOut);
+        _difficulty = new EnumEntry<Difficulty>(
+            _category,
+            "Difficulty",
+            Difficulty.Medium,
+            "Difficulty presets!"
+        );
+        _fadeMode = new EnumEntry<Mode>(_category, "FadeMode", Mode.FadeOut, "Notes fade mode!");
+
+        _debug = _category.CreateEntry("Debug", false, description: "Show debug logs!");
+    }
+
+    #region methods
+
+    internal static void Init()
+    {
+        WatcherConfig();
 
         Load();
     }
@@ -81,39 +93,32 @@ internal static class SettingsManager
             _ => Medium,
         };
 
-        Melon<Main>.Logger.Msg("Enabled: " + IsEnabled);
-        Melon<Main>.Logger.Msg("Difficulty: " + _difficulty.Value);
+        if (Debug)
+        {
+            _category.Entries.ForEach(
+                (entry) => logger.Debug($"{entry.DisplayName}: {entry.GetValueAsString()}")
+            );
+        }
     }
 
     internal static void Reload(bool sceneChanged = false)
     {
-        Melon<Main>.Logger.Msg("SceneChanged: " + sceneChanged);
-        Melon<Main>.Logger.Msg("IsGameScene: " + IsGameScene);
-        Melon<Main>.Logger.Msg("NeedReload: " + NeedReload);
+        // Reload only if not on game scene
+        // If on game scene, queue reload
+        // Reload on scene chenge if not on game scene and reload is queued
         if (IsGameScene)
         {
-            if (!sceneChanged)
-            {
-                NeedReload = true;
-            }
+            NeedReload |= !sceneChanged;
             return;
         }
 
-        if (!sceneChanged)
-        {
-            Load();
-            NeedReload = false;
-            return;
-        }
-
-        if (!NeedReload)
+        if (sceneChanged && !NeedReload)
         {
             return;
         }
 
         Load();
         NeedReload = false;
-        return;
     }
 
     internal static void SceneChanged(string sceneName)
@@ -151,9 +156,15 @@ internal static class SettingsManager
         private readonly T _defaultEnumValue;
         private readonly MelonPreferences_Entry<T> _entry;
 
-        internal EnumEntry(MelonPreferences_Category category, string name, T defaultValue)
+        internal EnumEntry(
+            MelonPreferences_Category category,
+            string name,
+            T defaultValue,
+            string description
+        )
         {
             _defaultEnumValue = defaultValue;
+            var desc = description + "\n" + string.Join('\n', Enum.GetNames<T>());
             _entry = category.CreateEntry(
                 name,
                 _defaultEnumValue,
@@ -180,7 +191,7 @@ internal static class SettingsManager
 
             public override object EnsureValid(object value)
             {
-                return Enum.TryParse(value.ToString().Trim(), true, out T result)
+                return Enum.TryParse(value.ToString()?.Trim() ?? "", true, out T result)
                     ? result
                     : DefaultValue;
             }
