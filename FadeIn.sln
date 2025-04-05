@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34525.116
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FadeIn", "FadeIn.csproj", "{B63A972D-93D1-425B-928D-BC7855291D65}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B63A972D-93D1-425B-928D-BC7855291D65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B63A972D-93D1-425B-928D-BC7855291D65}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B63A972D-93D1-425B-928D-BC7855291D65}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B63A972D-93D1-425B-928D-BC7855291D65}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {41ACE43C-B68E-4F00-926F-C9759A854487}
+	EndGlobalSection
+EndGlobal
