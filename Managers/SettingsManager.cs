@@ -71,7 +71,7 @@ internal static class SettingsManager
 
     internal static void Load()
     {
-        _category.LoadFromFile(true);
+        _category.LoadFromFile(false);
 
         difficultySettings = _difficulty.Value switch
         {
@@ -80,13 +80,22 @@ internal static class SettingsManager
             Difficulty.Hard => Hard,
             _ => Medium,
         };
+
+        Melon<Main>.Logger.Msg("Enabled: " + IsEnabled);
+        Melon<Main>.Logger.Msg("Difficulty: " + _difficulty.Value);
     }
 
     internal static void Reload(bool sceneChanged = false)
     {
+        Melon<Main>.Logger.Msg("SceneChanged: " + sceneChanged);
+        Melon<Main>.Logger.Msg("IsGameScene: " + IsGameScene);
+        Melon<Main>.Logger.Msg("NeedReload: " + NeedReload);
         if (IsGameScene)
         {
-            NeedReload = true;
+            if (!sceneChanged)
+            {
+                NeedReload = true;
+            }
             return;
         }
 
