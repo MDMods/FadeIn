@@ -3,9 +3,9 @@ using MelonLoader;
 using static FadeIn.Properties.MelonBuildInfo;
 using Main = FadeIn.Main;
 
-[assembly: MelonInfo(typeof(Main), ModName, ModVersion, Author)]
+[assembly: MelonInfo(typeof(Main), ModName, ModVersion, ModAuthor)]
 [assembly: MelonGame("PeroPeroGames", "MuseDash")]
-[assembly: MelonColor(255, 241, 196, 15)]
+[assembly: MelonColor(ModColorAlpha, ModColorRed, ModColorGreen, ModColorBlue)]
 
 [assembly: AssemblyTitle(ModName)]
 [assembly: AssemblyDescription("")]
