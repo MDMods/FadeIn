@@ -1,8 +1,8 @@
 ﻿using FadeIn.Properties;
-using FadeIn.Utilities;
 using MelonLoader;
 using MelonLoader.Preferences;
 using MelonLoader.Utils;
+using UnityEngine;
 
 namespace FadeIn.Managers;
 
@@ -14,17 +14,15 @@ internal static class SettingsManager
         remove => Watcher.Changed -= value;
     }
 
-    internal const float AlphaLowerLimit = 0.005f;
     internal const string FileName = $"{MelonBuildInfo.ModName}.cfg";
-    internal const float MinimalDistanceR = 70f;
-    internal const float MinimalDistanceX = 5.8f;
     internal const string Path = "UserData/" + FileName;
 
     #region properties
     internal static bool Debug => _debug.Value;
-    internal static float DisappearR => difficultySettings.DisappearR;
-    internal static float DisappearX => difficultySettings.DisappearX;
+    internal static Decay FadeDecay => _fadeDecay.Value;
+    internal static Difficulty FadeDifficulty => _difficulty.Value;
     internal static Mode FadeMode => _fadeMode.Value;
+    internal static FadeParameters InSettings { get; private set; }
 
     internal static bool IsEnabled
     {
@@ -34,19 +32,20 @@ internal static class SettingsManager
 
     internal static bool IsGameScene { get; private set; } = false;
     internal static bool NeedReload { get; private set; } = false;
+    internal static FadeParameters OutSettings { get; private set; }
     #endregion
 
     #region fields
     private static readonly MelonPreferences_Category _category;
     private static readonly MelonPreferences_Entry<bool> _debug;
     private static readonly EnumEntry<Difficulty> _difficulty;
+    private static readonly EnumEntry<Decay> _fadeDecay;
     private static readonly EnumEntry<Mode> _fadeMode;
     private static readonly MelonPreferences_Entry<bool> _isEnabled;
-    private static DifficultySettings difficultySettings;
-    private static readonly DifficultySettings Easy = new(-1.8f, 8f);
-    private static readonly DifficultySettings Hard = new(0f, 35f);
-    private static readonly Logger logger = new(nameof(SettingsManager));
-    private static readonly DifficultySettings Medium = new(-0.9f, 20f);
+    private static readonly FadeParameters Easy = new(-1.8f, 8f);
+    private static readonly FadeParameters Hard = new(0f, 35f);
+    private static readonly Utilities.Logger logger = new(nameof(SettingsManager));
+    private static readonly FadeParameters Medium = new(-0.9f, 20f);
     private static readonly FileSystemWatcher Watcher = new(MelonEnvironment.UserDataDirectory);
     #endregion
 
@@ -68,8 +67,17 @@ internal static class SettingsManager
             "Difficulty presets!"
         );
         _fadeMode = new EnumEntry<Mode>(_category, "FadeMode", Mode.FadeOut, "Notes fade mode!");
+        _fadeDecay = new EnumEntry<Decay>(
+            _category,
+            "FadeDecay",
+            Decay.Linear,
+            "Function used to calculate alpha value."
+        );
 
         _debug = _category.CreateEntry("Debug", false, description: "Show debug logs!");
+
+        InSettings = Medium;
+        OutSettings = Medium;
     }
 
     #region methods
@@ -85,12 +93,22 @@ internal static class SettingsManager
     {
         _category.LoadFromFile(false);
 
-        difficultySettings = _difficulty.Value switch
+        // * Settings difficulty is based on the original FadeIn, which is FadeOut....
+        // So I'll keep those values as reference, at least for now lol >.<
+        InSettings = FadeDifficulty switch
         {
-            Difficulty.Easy => Easy,
+            Difficulty.Easy => Hard,
             Difficulty.Medium => Medium,
-            Difficulty.Hard => Hard,
-            _ => Medium,
+            Difficulty.Hard => Easy,
+            _ => Medium
+        };
+
+        OutSettings = FadeDifficulty switch
+        {
+            Difficulty.Easy => Hard,
+            Difficulty.Medium => Medium,
+            Difficulty.Hard => Easy,
+            _ => Medium
         };
 
         if (Debug)
@@ -105,7 +123,7 @@ internal static class SettingsManager
     {
         // Reload only if not on game scene
         // If on game scene, queue reload
-        // Reload on scene chenge if not on game scene and reload is queued
+        // Reload on scene change if not on game scene and reload is queued
         if (IsGameScene)
         {
             NeedReload |= !sceneChanged;
@@ -168,10 +186,9 @@ internal static class SettingsManager
             _entry = category.CreateEntry(
                 name,
                 _defaultEnumValue,
-                validator: new EnumEntryValidator(defaultValue)
+                validator: new EnumEntryValidator(defaultValue),
+                description: desc
             );
-
-            // Todo: add description (show options)
         }
 
         internal void Subscribe(LemonAction<T, T> action)
@@ -200,6 +217,117 @@ internal static class SettingsManager
         }
     }
 
+    internal class FadeClass
+    {
+        private const float AlphaLowerLimit = 0.005f;
+        private const float AlphaUpperLimit = 0.995f;
+        private const float ExpDecayConst = 1.5f;
+
+        private static readonly float ExpNorm = Mathf.Exp(ExpDecayConst) - 1;
+
+        public FadeClass(
+            FadeParameters easy,
+            FadeParameters medium,
+            FadeParameters hard,
+            Func<float, float, float, float> linear,
+            Func<float, float, float, float> exp
+        ) { }
+
+        #region methods
+
+        private static float ExponentialIn(float x, float min, float max)
+        {
+            var top = Mathf.Exp(ExpDecayConst * (max - x) / (max - min)) - 1;
+            return top / ExpNorm;
+        }
+
+        private static float ExponentialOut(float x, float min, float max)
+        {
+            var top = Mathf.Exp(ExpDecayConst * (x - min) / (max - min)) - 1;
+            return top / ExpNorm;
+        }
+
+        private static float InDecay(
+            Func<float, float, float, float> decay,
+            float position,
+            float lowerLimit,
+            float upperLimit,
+            float alpha
+        )
+        {
+            if (position > upperLimit)
+            {
+                return 0f;
+            }
+
+            if (position < lowerLimit)
+            {
+                return 1f;
+            }
+
+            if (alpha > AlphaUpperLimit)
+            {
+                return 1f;
+            }
+
+            return Mathf.Clamp(decay(position, lowerLimit, upperLimit), alpha, 1f);
+        }
+
+        private static float LinearIn(float x, float min, float max) => (max - x) / (max - min);
+
+        private static float LinearOut(float x, float min, float max) => (x - min) / (max - min);
+
+        private static float OutDecay(
+            Func<float, float, float, float> decay,
+            float position,
+            float lowerLimit,
+            float upperLimit,
+            float alpha
+        )
+        {
+            if (position > upperLimit)
+            {
+                return 1f;
+            }
+
+            if (position < lowerLimit)
+            {
+                return 0f;
+            }
+
+            if (alpha < AlphaLowerLimit)
+            {
+                return 0f;
+            }
+
+            return Mathf.Clamp(decay(position, lowerLimit, upperLimit), 0f, alpha);
+        }
+
+        #endregion
+    }
+
+    internal static class FadeManager { }
+
+    internal class FadeParameters
+    {
+        public float DisappearR { get; init; }
+        public float DisappearX { get; init; }
+        public float ThresholdR { get; init; } = 70f;
+        public float ThresholdX { get; init; } = 5.8f;
+
+        public FadeParameters(float disappearX, float disappearR)
+        {
+            DisappearX = disappearX;
+            DisappearR = disappearR;
+        }
+    }
+
+    internal enum Decay
+    {
+        Linear,
+        Exponential
+    }
+
     internal enum Difficulty
     {
         Easy,
@@ -211,18 +339,6 @@ internal static class SettingsManager
     {
         FadeIn,
         FadeOut,
-        Random
-    }
-
-    private readonly struct DifficultySettings
-    {
-        public float DisappearR { get; init; }
-        public float DisappearX { get; init; }
-
-        public DifficultySettings(float disappearX, float disappearR)
-        {
-            DisappearX = disappearX;
-            DisappearR = disappearR;
-        }
+        // Random
     }
 }
