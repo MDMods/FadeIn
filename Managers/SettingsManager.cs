@@ -22,6 +22,7 @@ internal static class SettingsManager
     internal static Decay FadeDecay => _fadeDecay.Value;
     internal static Difficulty FadeDifficulty => _difficulty.Value;
     internal static Mode FadeMode => _fadeMode.Value;
+    internal static Func<float, float, float> GetAlphaCalculator => FadeClass.GetAlphaCalculator();
     internal static FadeParameters InSettings { get; private set; }
 
     internal static bool IsEnabled
@@ -81,6 +82,11 @@ internal static class SettingsManager
     }
 
     #region methods
+
+    internal static float GetAlpha(float alpha, float position)
+    {
+        return FadeClass.GetAlphaCalculator()(position, alpha);
+    }
 
     internal static void Init()
     {
@@ -150,6 +156,11 @@ internal static class SettingsManager
     {
         // It is highly recommended to only enable events on melon late start...
         Watcher.EnableRaisingEvents = true;
+    }
+
+    internal static void WatcherStop()
+    {
+        Watcher.EnableRaisingEvents = false;
     }
 
     private static void WatcherConfig()
@@ -225,29 +236,57 @@ internal static class SettingsManager
 
         private static readonly float ExpNorm = Mathf.Exp(ExpDecayConst) - 1;
 
-        public FadeClass(
-            FadeParameters easy,
-            FadeParameters medium,
-            FadeParameters hard,
-            Func<float, float, float, float> linear,
-            Func<float, float, float, float> exp
-        ) { }
-
         #region methods
 
-        private static float ExponentialIn(float x, float min, float max)
+        internal static float Exponential(float x, float min, float max)
         {
-            var top = Mathf.Exp(ExpDecayConst * (max - x) / (max - min)) - 1;
+            var top = Mathf.Exp(ExpDecayConst * x / (max - min)) - 1;
             return top / ExpNorm;
         }
 
-        private static float ExponentialOut(float x, float min, float max)
+        internal static Func<float, float, float> GetAlphaCalculator()
         {
-            var top = Mathf.Exp(ExpDecayConst * (x - min) / (max - min)) - 1;
-            return top / ExpNorm;
+            Func<float, float, float, float> functionCore = SettingsManager.FadeDecay switch
+            {
+                Decay.Linear => Linear,
+                Decay.Exponential => Exponential,
+                _ => Linear,
+            };
+
+            // Too much haskell...................
+            Func<Func<float, float, float, float>, float, float, float, float, float> decay;
+            Func<float, float, float, float> positionDeterminer;
+            FadeParameters parameters;
+            switch (SettingsManager.FadeMode)
+            {
+                case Mode.FadeIn:
+                    positionDeterminer = (x, min, max) => max - x;
+                    decay = InDecay;
+                    parameters = InSettings;
+                    break;
+                case Mode.FadeOut:
+                default:
+                    positionDeterminer = (x, min, max) => x - min;
+                    decay = OutDecay;
+                    parameters = OutSettings;
+                    break;
+            }
+            ;
+
+            float transformedCore(float x, float min, float max) =>
+                functionCore(positionDeterminer(x, min, max), min, max);
+
+            return (position, alpha) =>
+                decay(
+                    transformedCore,
+                    position,
+                    parameters.DisappearX,
+                    parameters.ThresholdX,
+                    alpha
+                );
         }
 
-        private static float InDecay(
+        internal static float InDecay(
             Func<float, float, float, float> decay,
             float position,
             float lowerLimit,
@@ -273,11 +312,13 @@ internal static class SettingsManager
             return Mathf.Clamp(decay(position, lowerLimit, upperLimit), alpha, 1f);
         }
 
-        private static float LinearIn(float x, float min, float max) => (max - x) / (max - min);
+        internal static float Linear(float x, float min, float max) => x / (max - min);
 
-        private static float LinearOut(float x, float min, float max) => (x - min) / (max - min);
+        internal static float LinearIn(float x, float min, float max) => Linear(max - x, min, max);
 
-        private static float OutDecay(
+        internal static float LinearOut(float x, float min, float max) => Linear(x - min, min, max);
+
+        internal static float OutDecay(
             Func<float, float, float, float> decay,
             float position,
             float lowerLimit,
