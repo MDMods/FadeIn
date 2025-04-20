@@ -6,6 +6,122 @@ using UnityEngine;
 
 namespace FadeIn.Managers;
 
+internal interface IInterpolator
+{
+    float Interpolate(float x, float min, float max);
+}
+
+internal interface ITransformation
+{
+    public float Transform(float x, float min, float max);
+}
+
+#region classes
+
+internal class ExponentialInterpolator : IInterpolator
+{
+    private const float ExpDecayConst = 1.5f;
+
+    private static readonly float ExpNorm = Mathf.Exp(ExpDecayConst) - 1;
+
+    public float Interpolate(float x, float min, float max)
+    {
+        var top = Mathf.Exp(ExpDecayConst * x / (max - min)) - 1;
+        return top / ExpNorm;
+    }
+}
+
+internal class Fader
+{
+    private const float AlphaLowerLimit = 0.005f;
+    private const float AlphaUpperLimit = 0.995f;
+
+    #region fields
+    internal static readonly IInterpolator Exponential = new ExponentialInterpolator();
+    internal static readonly ITransformation InTransform = new InTransformation();
+    internal static readonly IInterpolator Linear = new LinearInterpolator();
+    internal static readonly ITransformation OutTransform = new OutTransformation();
+    private readonly ValueRange AlphaRange;
+    private readonly IInterpolator Interpolator;
+    private readonly ValueRange PositionRange;
+    private readonly ITransformation Transform;
+    #endregion
+
+    internal Fader(
+        IInterpolator interpolator,
+        ITransformation transform,
+        ValueRange positionRange,
+        ValueRange alphaRange
+    )
+    {
+        /*
+        PositionRange should contain as Start value the lowest value of the two
+        and End value as the biggest value.
+        In the context of the game, the start is the leftmost part of the screen
+        and the end is the rightmost part of the screen.
+        */
+        /*
+        AlphaRange should contain as Start value the initial value we should have
+        on the object as alpha (0 in case of FadeOut, 1 in case of FadeIn) which
+        is the value we will clamp to if the position of the object is to the left
+        of PositionRange.End.
+        The End value should have the value that we will clamp to if the object
+        is to the left of PositionRange.Start.
+        * AAAA
+        */
+        (Interpolator, Transform, PositionRange, AlphaRange) = (
+            interpolator,
+            transform,
+            positionRange,
+            alphaRange
+        );
+    }
+
+    public float GetAlpha(float position)
+    {
+        if (position > PositionRange.Right)
+        {
+            return AlphaRange.Left;
+        }
+        if (position < PositionRange.Left)
+        {
+            return AlphaRange.Right;
+        }
+
+        var alpha = CalculateAlpha(position);
+        return CalculateAlpha(position);
+    }
+
+    private float CalculateAlpha(float position)
+    {
+        // Min and max correspond to the settings
+        var min = PositionRange.Left;
+        var max = PositionRange.Right;
+        var transformedPosition = Transform.Transform(position, min, max);
+        var newAlpha = Interpolator.Interpolate(transformedPosition, min, max);
+        if (newAlpha < AlphaLowerLimit)
+            return 0f;
+        if (newAlpha > AlphaUpperLimit)
+            return 1f;
+        return newAlpha;
+    }
+}
+
+internal class InTransformation : ITransformation
+{
+    public float Transform(float x, float min, float max) => max - x;
+}
+
+internal class LinearInterpolator : IInterpolator
+{
+    public float Interpolate(float x, float min, float max) => x / (max - min);
+}
+
+internal class OutTransformation : ITransformation
+{
+    public float Transform(float x, float min, float max) => x - min;
+}
+
 internal static class SettingsManager
 {
     internal static event FileSystemEventHandler WatcherEvent
@@ -22,7 +138,6 @@ internal static class SettingsManager
     internal static Decay FadeDecay => _fadeDecay.Value;
     internal static Difficulty FadeDifficulty => _difficulty.Value;
     internal static Mode FadeMode => _fadeMode.Value;
-    internal static Func<float, float, float> GetAlphaCalculator => FadeClass.GetAlphaCalculator();
     internal static FadeParameters InSettings { get; private set; }
 
     internal static bool IsEnabled
@@ -43,10 +158,14 @@ internal static class SettingsManager
     private static readonly EnumEntry<Decay> _fadeDecay;
     private static readonly EnumEntry<Mode> _fadeMode;
     private static readonly MelonPreferences_Entry<bool> _isEnabled;
-    private static readonly FadeParameters Easy = new(-1.8f, 8f);
-    private static readonly FadeParameters Hard = new(0f, 35f);
+    private static readonly FadeParameters InEasy = new(5.8f, 0f, 70f, 8f);
+    private static readonly FadeParameters InHard = new(2f, -0.8f, 70f, 35f);
+    private static readonly FadeParameters InMedium = new(3.9f, -0.4f, 70f, 20f);
+    private static readonly FadeParameters InVeryHard = new(1f, -1.8f, 70f, 35f);
     private static readonly Utilities.Logger logger = new(nameof(SettingsManager));
-    private static readonly FadeParameters Medium = new(-0.9f, 20f);
+    private static readonly FadeParameters OutEasy = new(5.8f, -1.8f, 70f, 8f);
+    private static readonly FadeParameters OutHard = new(5.8f, 0f, 70f, 35f);
+    private static readonly FadeParameters OutMedium = new(5.8f, -0.9f, 70f, 20f);
     private static readonly FileSystemWatcher Watcher = new(MelonEnvironment.UserDataDirectory);
     #endregion
 
@@ -77,15 +196,40 @@ internal static class SettingsManager
 
         _debug = _category.CreateEntry("Debug", false, description: "Show debug logs!");
 
-        InSettings = Medium;
-        OutSettings = Medium;
+        InSettings = OutMedium;
+        OutSettings = OutMedium;
     }
 
     #region methods
 
-    internal static float GetAlpha(float alpha, float position)
+    internal static Fader GetFader()
     {
-        return FadeClass.GetAlphaCalculator()(position, alpha);
+        var interpolator = FadeDecay switch
+        {
+            Decay.Exponential => Fader.Exponential,
+            _ => Fader.Linear
+        };
+
+        ITransformation transform;
+        FadeParameters parameters;
+        ValueRange alphaRange;
+        switch (FadeMode)
+        {
+            case Mode.FadeIn:
+                transform = Fader.InTransform;
+                parameters = InSettings;
+                alphaRange = new ValueRange(0, 1);
+                break;
+            default:
+                transform = Fader.OutTransform;
+                parameters = OutSettings;
+                alphaRange = new ValueRange(1, 0);
+                break;
+        }
+
+        var rangeParameters = new ValueRange(parameters.LeftX, parameters.RightX);
+
+        return new Fader(interpolator, transform, rangeParameters, alphaRange);
     }
 
     internal static void Init()
@@ -99,22 +243,21 @@ internal static class SettingsManager
     {
         _category.LoadFromFile(false);
 
-        // * Settings difficulty is based on the original FadeIn, which is FadeOut....
-        // So I'll keep those values as reference, at least for now lol >.<
         InSettings = FadeDifficulty switch
         {
-            Difficulty.Easy => Hard,
-            Difficulty.Medium => Medium,
-            Difficulty.Hard => Easy,
-            _ => Medium
+            Difficulty.Easy => InEasy,
+            Difficulty.Medium => InMedium,
+            Difficulty.Hard => InHard,
+            Difficulty.VeryHard => InVeryHard,
+            _ => InMedium
         };
 
         OutSettings = FadeDifficulty switch
         {
-            Difficulty.Easy => Hard,
-            Difficulty.Medium => Medium,
-            Difficulty.Hard => Easy,
-            _ => Medium
+            Difficulty.Easy => OutEasy,
+            Difficulty.Medium => OutMedium,
+            Difficulty.Hard => OutHard,
+            _ => OutMedium
         };
 
         if (Debug)
@@ -228,141 +371,6 @@ internal static class SettingsManager
         }
     }
 
-    internal class FadeClass
-    {
-        private const float AlphaLowerLimit = 0.005f;
-        private const float AlphaUpperLimit = 0.995f;
-        private const float ExpDecayConst = 1.5f;
-
-        private static readonly float ExpNorm = Mathf.Exp(ExpDecayConst) - 1;
-
-        #region methods
-
-        internal static float Exponential(float x, float min, float max)
-        {
-            var top = Mathf.Exp(ExpDecayConst * x / (max - min)) - 1;
-            return top / ExpNorm;
-        }
-
-        internal static Func<float, float, float> GetAlphaCalculator()
-        {
-            Func<float, float, float, float> functionCore = SettingsManager.FadeDecay switch
-            {
-                Decay.Linear => Linear,
-                Decay.Exponential => Exponential,
-                _ => Linear,
-            };
-
-            // Too much haskell...................
-            Func<Func<float, float, float, float>, float, float, float, float, float> decay;
-            Func<float, float, float, float> positionDeterminer;
-            FadeParameters parameters;
-            switch (SettingsManager.FadeMode)
-            {
-                case Mode.FadeIn:
-                    positionDeterminer = (x, min, max) => max - x;
-                    decay = InDecay;
-                    parameters = InSettings;
-                    break;
-                case Mode.FadeOut:
-                default:
-                    positionDeterminer = (x, min, max) => x - min;
-                    decay = OutDecay;
-                    parameters = OutSettings;
-                    break;
-            }
-            ;
-
-            float transformedCore(float x, float min, float max) =>
-                functionCore(positionDeterminer(x, min, max), min, max);
-
-            return (position, alpha) =>
-                decay(
-                    transformedCore,
-                    position,
-                    parameters.DisappearX,
-                    parameters.ThresholdX,
-                    alpha
-                );
-        }
-
-        internal static float InDecay(
-            Func<float, float, float, float> decay,
-            float position,
-            float lowerLimit,
-            float upperLimit,
-            float alpha
-        )
-        {
-            if (position > upperLimit)
-            {
-                return 0f;
-            }
-
-            if (position < lowerLimit)
-            {
-                return 1f;
-            }
-
-            if (alpha > AlphaUpperLimit)
-            {
-                return 1f;
-            }
-
-            return Mathf.Clamp(decay(position, lowerLimit, upperLimit), alpha, 1f);
-        }
-
-        internal static float Linear(float x, float min, float max) => x / (max - min);
-
-        internal static float LinearIn(float x, float min, float max) => Linear(max - x, min, max);
-
-        internal static float LinearOut(float x, float min, float max) => Linear(x - min, min, max);
-
-        internal static float OutDecay(
-            Func<float, float, float, float> decay,
-            float position,
-            float lowerLimit,
-            float upperLimit,
-            float alpha
-        )
-        {
-            if (position > upperLimit)
-            {
-                return 1f;
-            }
-
-            if (position < lowerLimit)
-            {
-                return 0f;
-            }
-
-            if (alpha < AlphaLowerLimit)
-            {
-                return 0f;
-            }
-
-            return Mathf.Clamp(decay(position, lowerLimit, upperLimit), 0f, alpha);
-        }
-
-        #endregion
-    }
-
-    internal static class FadeManager { }
-
-    internal class FadeParameters
-    {
-        public float DisappearR { get; init; }
-        public float DisappearX { get; init; }
-        public float ThresholdR { get; init; } = 70f;
-        public float ThresholdX { get; init; } = 5.8f;
-
-        public FadeParameters(float disappearX, float disappearR)
-        {
-            DisappearX = disappearX;
-            DisappearR = disappearR;
-        }
-    }
-
     internal enum Decay
     {
         Linear,
@@ -373,7 +381,8 @@ internal static class SettingsManager
     {
         Easy,
         Medium,
-        Hard
+        Hard,
+        VeryHard
     }
 
     internal enum Mode
@@ -383,3 +392,9 @@ internal static class SettingsManager
         // Random
     }
 }
+
+#endregion
+
+internal record FadeParameters(float RightX, float LeftX, float RightR, float LeftR);
+
+internal record ValueRange(float Left, float Right);
