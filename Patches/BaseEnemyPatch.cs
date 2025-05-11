@@ -1,29 +1,43 @@
 ﻿using FadeIn.Managers;
+using FadeIn.Utilities;
 using HarmonyLib;
 using Il2Cpp;
-using Il2CppSpine.Unity;
 
 namespace FadeIn.Patches;
 
-[HarmonyPatch(typeof(BaseEnemyObjectController), nameof(BaseEnemyObjectController.EnableVisible))]
+[HarmonyPatch(typeof(BaseEnemyObjectController))]
 internal static class BaseEnemyPatch
 {
-    internal static void Postfix(BaseEnemyObjectController __instance)
+    // , nameof(BaseEnemyObjectController.EnableVisible)
+    [HarmonyPatch(nameof(BaseEnemyObjectController.EnableVisible))]
+    [HarmonyPostfix]
+    internal static void DisablePostfix(BaseEnemyObjectController __instance)
     {
-        if (!SettingsManager.IsEnabled) return;
+        if (!SettingsManager.IsEnabled)
+            return;
 
-        var sk = __instance.m_SkeletonAnimation.skeleton;
-        NormalEnemyManager.ProcessEnemy(__instance, sk);
+        EnemyManager.ActivateEnemy(__instance);
+    }
 
-        var parent = __instance.transform.parent;
-        if (parent.name.Equals("SceneObjectController")) return;
+    [HarmonyPostfix]
+    [HarmonyPatch(nameof(BaseEnemyObjectController.Init))]
+    internal static void Init(BaseEnemyObjectController __instance)
+    {
+        if (!SettingsManager.IsEnabled)
+            return;
 
-        for (var i = 0; i < parent.childCount; i++)
-        {
-            var child = parent.GetChild(i);
-            if (child.name.Equals(__instance.name)) continue;
+        EnemyManager.InitEnemy(__instance);
+    }
+}
 
-            NormalEnemyManager.ProcessEnemy(__instance, child.GetComponent<SkeletonAnimation>().skeleton);
-        }
+[HarmonyPatch("Il2CppInterop.HarmonySupport.Il2CppDetourMethodPatcher", "ReportException")]
+internal static class Il2CppDetourMethodPatcherPatch
+{
+    private static readonly Logger Logger = new(nameof(Il2CppDetourMethodPatcherPatch));
+
+    private static bool Prefix(Exception ex)
+    {
+        Logger.Msg("During invoking native->managed trampoline: " + ex);
+        return false;
     }
 }
